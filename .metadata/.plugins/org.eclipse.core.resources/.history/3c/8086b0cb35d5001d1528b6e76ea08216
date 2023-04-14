@@ -1,0 +1,69 @@
+package com.appt.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.appt.dto.NseResponseDto;
+import com.appt.model.Nse;
+import com.appt.service.NseService;
+
+@RestController
+@RequestMapping("/api/stocks")
+public class NseController {
+
+	@Autowired
+	private NseService nseService;
+	
+	@PostMapping("/insert")
+	public void setDataInDB() {
+		nseService.saveNseData();
+	}
+	
+	@GetMapping("/all")
+	public List<Nse> getAllStocks(){
+		List<Nse> list = nseService.allStocks();
+		return list;
+	}
+	
+	@GetMapping("/{IsinNo}")
+	public Nse getStockByCode(@PathVariable("IsinNo") String IsinNo) {
+		Nse nse = nseService.findByIsinNo(IsinNo);
+			
+//		NseResponseDto dto = new NseResponseDto();
+//		
+//		dto.setIsinNo(nse.getIsinNo());
+//		dto.setSecurityName(nse.getSecurityName());
+//		dto.setSecurityCode(nse.getSecurityCode());
+//		dto.setSector(nse.getSector());
+//		dto.setIndustry(nse.getIndustry());
+//		dto.setSymbol(nse.getSymbol());
+		return nse;
+	}
+	
+	@GetMapping("/symbol")
+	public Nse getStocksBySymbol(@RequestParam String symbol){
+		Nse stock = nseService.getBySymbol(symbol);   
+	    return stock;
+	}
+	
+	@GetMapping("/sector/")
+	public List<Nse> getStocksBySector(@RequestParam String sector) {
+		List<Nse> stock = nseService.fetchBySector(sector);
+		return stock;
+	}
+	
+	@GetMapping("/industry/")
+	public List<Nse> getStocksByIndustry(@RequestParam String industry) {
+		List<Nse> stock = nseService.fetchByIndustry(industry);
+		return stock;
+	}
+	
+}

@@ -1,0 +1,63 @@
+package com.appt.service;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appt.model.Nse;
+import com.appt.repository.NseRepository;
+
+@Service
+public class NseService {
+
+	@Autowired
+	private NseRepository nseRepo;
+    String line = "";
+	public void saveNseData() {
+	try {
+		BufferedReader br = new BufferedReader(new FileReader("src/main/resources/Stock.csv"));
+	while((line = br.readLine())!= null){
+		String [] data = line.split(",");
+		
+		Nse n = new Nse();
+		n.setSecurityCode(data[0]);
+		n.setSymbol(data[1]);
+		n.setSecurityName(data[2]);
+		n.setIsinNo(data[3]);
+		n.setSector(data[4]);
+		n.setIndustry(data[5]);
+		n.setExchange(data[6]);
+		n.setCurrency(data[7]);
+		
+		nseRepo.save(n);
+	}
+		} catch (IOException e) {
+		e.printStackTrace();
+	} 
+}
+	public List<Nse> allStocks(){
+		List<Nse> list = nseRepo.findAll();
+		return list;
+	}
+	
+	public Nse findByIsinNo(String IsinNo) {
+		return nseRepo.findByIsinNo(IsinNo);
+	}
+	
+	public Nse getBySymbol(String symbol) {
+		return nseRepo.findBySymbol(symbol);
+	}
+	
+	public List<Nse> fetchBySector(String sector){
+		return nseRepo.findBySector(sector);
+	}
+	
+	public List<Nse> fetchByIndustry(String industry){
+		return nseRepo.findByIndustry(industry);
+	}
+}

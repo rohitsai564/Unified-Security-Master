@@ -1,0 +1,85 @@
+package com.appt.service;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.appt.dto.NseResponseDto;
+import com.appt.model.Nse;
+import com.appt.repository.NseRepository;
+
+@Service
+public class NseService {
+
+	@Autowired
+	private NseRepository nseRepo;
+	String line = "";
+	@PostConstruct
+	public void saveNseData() {
+	try {
+	BufferedReader br = new BufferedReader(new FileReader("src/main/resources/Stock.csv"));
+	while ((line = br.readLine()) != null) {
+	String[] data = line.split(",");
+	Nse n = new Nse();
+	n.setSecurityCode(data[0]);
+	n.setSymbol(data[1]);
+	n.setSecurityName(data[2]);
+	n.setIsinNo(data[3]);
+	n.setSector(data[4]);
+	n.setIndustry(data[5]);
+	n.setExchange(data[6]);
+	n.setCurrency(data[7]);
+	nseRepo.save(n);
+	}
+	} catch (IOException e) {
+	e.printStackTrace();
+	}
+	}
+	public List<Nse> allStocks() {
+	List<Nse> list = nseRepo.findAll();
+	return list;
+	}
+	public Nse findByIsinNo(String isinNo) {
+	return nseRepo.findByIsinNo(isinNo);
+	}
+	public Nse getBySymbol(String symbol) {
+	return nseRepo.findBySymbol(symbol);
+	}
+	public List<Nse> fetchBySector(String sector) {
+	return nseRepo.findBySectorContaining(sector);
+	}
+	public List<NseResponseDto> fetchByIndustry(String industry) {
+	List<Nse> stocks = nseRepo.findByIndustryContaining(industry);
+	List<NseResponseDto> listDto = new ArrayList<NseResponseDto>();
+	for(Nse nse:stocks) {
+	NseResponseDto dto = new NseResponseDto();
+	dto.setIsinNo(nse.getIsinNo());
+	dto.setSecurityCode(nse.getSecurityCode());
+	dto.setSecurityName(nse.getSecurityName());
+	dto.setSymbol(nse.getSymbol());
+	dto.setSector(nse.getSector());
+	dto.setIndustry(nse.getIndustry());
+	listDto.add(dto);
+	}
+	return listDto;
+	}
+	public NseResponseDto fetchStockBySecurityName(String securityName) {
+	Nse stock = nseRepo.findBySecurityName(securityName);
+	NseResponseDto dto = new NseResponseDto();
+	dto.setIsinNo(stock.getIsinNo());
+	dto.setSecurityName(stock.getSecurityName());
+	dto.setSector(stock.getSector());
+	dto.setSymbol(stock.getSymbol());
+	dto.setIndustry(stock.getIndustry());
+	dto.setSecurityCode(stock.getSecurityCode());
+	return dto;
+	}
+}
